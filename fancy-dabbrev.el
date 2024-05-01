@@ -454,7 +454,8 @@ nil."
   (when fancy-dabbrev--preview-overlay
     (setq fancy-dabbrev--preview-overlay-was-visible t)
     (delete-overlay fancy-dabbrev--preview-overlay)
-    (setq fancy-dabbrev--preview-overlay nil)))
+    (setq fancy-dabbrev--preview-overlay nil)
+    (fancy-dabbrev-overlay-mode -1)))
 
 (defun fancy-dabbrev--post-command-hook ()
   "[internal] Function run from `post-command-hook'."
@@ -515,7 +516,8 @@ nil."
           (add-text-properties
            0 (length expansion) '(face fancy-dabbrev-preview-face) expansion)
           (overlay-put
-           fancy-dabbrev--preview-overlay 'after-string expansion))))))
+           fancy-dabbrev--preview-overlay 'after-string expansion)
+          (fancy-dabbrev-overlay-mode +1))))))
 
 (defun fancy-dabbrev--expand-first-time ()
   "[internal] Insert expansion the first time.
@@ -614,6 +616,16 @@ That is, if `this-command' is not one of
   (when (fancy-dabbrev--is-fancy-dabbrev-command last-command)
     (fancy-dabbrev--insert-expansion fancy-dabbrev--entered-abbrev)))
 
+(defvar fancy-dabbrev-overlay-map (make-sparse-keymap)
+  "Keymap for fancy-dabbrev-overlay-mode")
+
+(define-minor-mode fancy-dabbrev-overlay-mode
+  "Minor mode which is active when `fancy-dabbrev-mode' overlay is active."
+  :ligher nil
+  :init-value nil
+  :global nil
+  :keymap fancy-dabbrev-overlay-map)
+
 ;;;###autoload
 (define-minor-mode fancy-dabbrev-mode
   "Toggle `fancy-dabbrev-mode'.
@@ -636,7 +648,8 @@ functionality is activated."
     ;; Clean up runtime state.
     (when fancy-dabbrev--preview-overlay
       (delete-overlay fancy-dabbrev--preview-overlay)
-      (setq fancy-dabbrev--preview-overlay nil))
+      (setq fancy-dabbrev--preview-overlay nil)
+      (fancy-dabbrev-overlay-mode -1))
     (when (timerp fancy-dabbrev--preview-timer)
       (cancel-timer fancy-dabbrev--preview-timer)
       (setq fancy-dabbrev--preview-timer nil))))
